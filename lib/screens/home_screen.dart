@@ -15,8 +15,8 @@ class HomeScreen extends StatefulWidget {
 }
 
 class _HomeScreenState extends State<HomeScreen> {
-  late StorageService _storageService;
-  late AuthService _authService;
+  StorageService? _storageService;
+  AuthService? _authService;
   bool _isLoading = true;
 
   @override
@@ -41,7 +41,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final user = _authService.currentUser;
+    final user = _authService?.currentUser;
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F172A),
@@ -89,7 +89,7 @@ class _HomeScreenState extends State<HomeScreen> {
             color: const Color(0xFF1E293B),
             onSelected: (val) async {
               if (val == 'logout') {
-                await _authService.logout();
+                await _authService?.logout();
                 if (context.mounted) {
                   Navigator.pushReplacement(
                     context,
@@ -97,7 +97,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
               } else if (val == 'reset_all') {
-                await _storageService.clearAllData();
+                await _storageService?.clearAllData();
                 _refreshData();
                 if (context.mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -160,12 +160,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             children: [
                               Icon(Icons.verified_user_rounded, color: Color(0xFF818CF8), size: 20),
                               SizedBox(width: 8),
-                              Text(
-                                'Göz Takibi & Sınav Güvenliği Aktif',
-                                style: TextStyle(
-                                  color: Color(0xFF818CF8),
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 13,
+                              Expanded(
+                                child: Text(
+                                  'Göz Takibi & Sınav Güvenliği Aktif',
+                                  style: TextStyle(
+                                    color: Color(0xFF818CF8),
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                  ),
                                 ),
                               ),
                             ],
@@ -200,10 +202,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildTestCard(TestModel test) {
-    final isCompleted = _storageService.isTestCompleted(test.id);
-    final remaining = _storageService.getRemainingAttempts(test.id, maxAttempts: test.maxFailureAttempts);
-    final isLocked = _storageService.isTestLocked(test.id, maxAttempts: test.maxFailureAttempts);
-    final bestScore = _storageService.getBestIqScore(test.id);
+    final storage = _storageService;
+    final isCompleted = storage?.isTestCompleted(test.id) ?? false;
+    final remaining = storage?.getRemainingAttempts(test.id, maxAttempts: test.maxFailureAttempts) ?? test.maxFailureAttempts;
+    final isLocked = storage?.isTestLocked(test.id, maxAttempts: test.maxFailureAttempts) ?? false;
+    final bestScore = storage?.getBestIqScore(test.id);
 
     Color badgeBg;
     Color badgeText;
@@ -252,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
       child: InkWell(
         onTap: () async {
           if (isCompleted) {
-            final completedAttempt = _storageService.getCompletedAttempt(test.id);
+            final completedAttempt = storage?.getCompletedAttempt(test.id);
             if (completedAttempt != null) {
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -376,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
                   ),
                   const Spacer(),
-                  if (bestScore > 0)
+                  if (bestScore != null && bestScore > 0)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                       decoration: BoxDecoration(

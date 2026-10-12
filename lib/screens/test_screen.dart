@@ -5,6 +5,7 @@ import '../models/question.dart';
 import '../models/test_attempt.dart';
 import '../services/storage_service.dart';
 import '../services/proctor_service.dart';
+import '../services/camera_vision_service.dart';
 import '../widgets/proctor_hud.dart';
 import '../widgets/matrix_question_viewer.dart';
 import 'result_screen.dart';
@@ -111,6 +112,10 @@ class _TestScreenState extends State<TestScreen> {
     );
 
     _proctorService.startMonitoring();
+
+    // Gerçek Ön Kamerayı ve Otomatik Göz/Yüz Takibini Başlat
+    await CameraVisionService.instance.initializeCamera(proctorService: _proctorService);
+
     _startCountdown();
 
     if (mounted) {
@@ -161,6 +166,7 @@ class _TestScreenState extends State<TestScreen> {
   void _handleProctorViolation(ProctorViolationType type, String reason) async {
     if (_isFinished || _isPaused) return;
     _isFinished = true;
+    CameraVisionService.instance.stop();
     _proctorService.stopMonitoring();
     _countdownTimer?.cancel();
 
@@ -194,6 +200,7 @@ class _TestScreenState extends State<TestScreen> {
   void _finishTestWithTimeout() async {
     if (_isFinished) return;
     _isFinished = true;
+    CameraVisionService.instance.stop();
     _proctorService.stopMonitoring();
     _countdownTimer?.cancel();
 
@@ -243,6 +250,7 @@ class _TestScreenState extends State<TestScreen> {
   void _finishTestWithSuccess() async {
     if (_isFinished) return;
     _isFinished = true;
+    CameraVisionService.instance.stop();
     _proctorService.stopMonitoring();
     _countdownTimer?.cancel();
 
@@ -308,6 +316,7 @@ class _TestScreenState extends State<TestScreen> {
 
   @override
   void dispose() {
+    CameraVisionService.instance.stop();
     _proctorService.stopMonitoring();
     _countdownTimer?.cancel();
     super.dispose();
@@ -414,9 +423,7 @@ class _TestScreenState extends State<TestScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     child: ProctorHud(
                       gazeState: _currentGazeState,
-                      onSimulateLookAway: () => _proctorService.simulateGazeShift(true),
-                      onSimulateLookBack: () => _proctorService.simulateGazeShift(false),
-                      showSimulatorControls: true,
+                      cameraController: CameraVisionService.instance.controller,
                     ),
                   ),
 

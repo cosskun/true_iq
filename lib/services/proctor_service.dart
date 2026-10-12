@@ -156,10 +156,4 @@ class ProctorService with WidgetsBindingObserver {
       ),
     );
   }
-
-  /// Geliştirici / Test simülatörü için manuel göz ayırma tetikleyicisi
-  void simulateGazeShift(bool lookAway) {
-    _isAttentive = !lookAway;
-    _currentYaw = lookAway ? 35.0 : 0.0;
-  }
 }

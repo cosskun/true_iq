@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:camera/camera.dart';
 import '../services/proctor_service.dart';
 
 class ProctorHud extends StatelessWidget {
   final GazeState? gazeState;
-  final VoidCallback? onSimulateLookAway;
-  final VoidCallback? onSimulateLookBack;
-  final bool showSimulatorControls;
+  final CameraController? cameraController;
+  final bool isCameraActive;
 
   const ProctorHud({
     super.key,
     required this.gazeState,
-    this.onSimulateLookAway,
-    this.onSimulateLookBack,
-    this.showSimulatorControls = true,
+    this.cameraController,
+    this.isCameraActive = true,
   });
 
   @override
@@ -42,131 +41,132 @@ class ProctorHud extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: isWarning
-                ? Colors.redAccent.withValues(alpha: 0.3)
+                ? Colors.redAccent.withValues(alpha: 0.35)
                 : Colors.black.withValues(alpha: 0.2),
-            blurRadius: 10,
+            blurRadius: isWarning ? 14 : 8,
             spreadRadius: isWarning ? 2 : 0,
           ),
         ],
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
+      child: Row(
         children: [
-          Row(
-            children: [
-              // Küçük Ön Kamera Önizleme Çerçevesi
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF0F172A),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: badgeColor, width: 2),
-                ),
-                child: Center(
-                  child: Icon(
-                    state.isFaceDetected
-                        ? (state.isAttentive ? Icons.visibility : Icons.visibility_off)
-                        : Icons.no_photography,
-                    color: badgeColor,
-                    size: 22,
-                  ),
-                ),
+          // CANLI ÖN KAMERA AKIŞI (Oval Çerçeve)
+          Container(
+            width: 54,
+            height: 54,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0F172A),
+              shape: BoxShape.circle,
+              border: Border.all(
+                color: badgeColor,
+                width: 2.5,
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+              boxShadow: [
+                BoxShadow(
+                  color: badgeColor.withValues(alpha: 0.4),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                ),
+              ],
+            ),
+            child: ClipOval(
+              child: _buildCameraPreview(badgeColor),
+            ),
+          ),
+          const SizedBox(width: 14),
+
+          // Durum Mesajı ve Dikkat Seviyesi İlerleme Çubuğu
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
                   children: [
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: BoxDecoration(
-                            color: badgeColor,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          state.statusMessage,
-                          style: TextStyle(
-                            color: isWarning ? Colors.redAccent : Colors.white,
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
+                    Container(
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        color: badgeColor,
+                        shape: BoxShape.circle,
+                      ),
                     ),
-                    const SizedBox(height: 4),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(4),
-                      child: LinearProgressIndicator(
-                        value: state.attentionPercent,
-                        backgroundColor: const Color(0xFF334155),
-                        valueColor: AlwaysStoppedAnimation<Color>(
-                          state.attentionPercent > 0.5
-                              ? const Color(0xFF10B981)
-                              : Colors.redAccent,
+                    const SizedBox(width: 6),
+                    Expanded(
+                      child: Text(
+                        state.statusMessage,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: isWarning ? Colors.redAccent : Colors.white,
+                          fontSize: 13,
+                          fontWeight: FontWeight.bold,
                         ),
-                        minHeight: 5,
                       ),
                     ),
                   ],
                 ),
-              ),
-            ],
-          ),
-
-          // Simülasyon test butonları (Tarayıcı ve Geliştirici ortamı için)
-          if (showSimulatorControls) ...[
-            const SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                const Text(
-                  'Göz Takibi Simülatörü:',
-                  style: TextStyle(fontSize: 11, color: Color(0xFF94A3B8)),
-                ),
-                const SizedBox(width: 8),
-                InkWell(
-                  onTap: onSimulateLookAway,
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: Colors.red.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: Colors.redAccent.withValues(alpha: 0.5)),
+                const SizedBox(height: 6),
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(4),
+                  child: LinearProgressIndicator(
+                    value: state.attentionPercent,
+                    backgroundColor: const Color(0xFF334155),
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      state.attentionPercent > 0.5
+                          ? const Color(0xFF10B981)
+                          : Colors.redAccent,
                     ),
-                    child: const Text(
-                      'Gözü Ayır (İhlal Et)',
-                      style: TextStyle(fontSize: 11, color: Colors.redAccent, fontWeight: FontWeight.bold),
-                    ),
+                    minHeight: 6,
                   ),
                 ),
-                const SizedBox(width: 6),
-                InkWell(
-                  onTap: onSimulateLookBack,
-                  borderRadius: BorderRadius.circular(6),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF10B981).withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(6),
-                      border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.5)),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      isWarning ? '⚠️ Göz/Kafa Ekran Dışında' : '🛡️ Otomatik Yapay Zeka Göz Takibi',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: isWarning ? Colors.redAccent : const Color(0xFF94A3B8),
+                        fontWeight: isWarning ? FontWeight.bold : FontWeight.normal,
+                      ),
                     ),
-                    child: const Text(
-                      'Ekrana Bak',
-                      style: TextStyle(fontSize: 11, color: Color(0xFF10B981), fontWeight: FontWeight.bold),
+                    Text(
+                      '${(state.attentionPercent * 100).toInt()}%',
+                      style: TextStyle(
+                        fontSize: 10,
+                        color: badgeColor,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
+          ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildCameraPreview(Color badgeColor) {
+    if (cameraController != null && cameraController!.value.isInitialized) {
+      return FittedBox(
+        fit: BoxFit.cover,
+        child: SizedBox(
+          width: cameraController!.value.previewSize?.height ?? 100,
+          height: cameraController!.value.previewSize?.width ?? 100,
+          child: CameraPreview(cameraController!),
+        ),
+      );
+    }
+
+    return Center(
+      child: Icon(
+        Icons.face_retouching_natural,
+        color: badgeColor,
+        size: 26,
       ),
     );
   }

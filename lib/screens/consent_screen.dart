@@ -132,12 +132,14 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       children: [
                         Icon(Icons.shield_outlined, color: Color(0xFF10B981), size: 18),
                         SizedBox(width: 8),
-                        Text(
-                          'Kamera ve Gizlilik Taahhüdü (KVKK/GDPR)',
-                          style: TextStyle(
-                            color: Color(0xFF10B981),
-                            fontSize: 13,
-                            fontWeight: FontWeight.bold,
+                        Expanded(
+                          child: Text(
+                            'Kamera ve Gizlilik Taahhüdü (KVKK/GDPR)',
+                            style: TextStyle(
+                              color: Color(0xFF10B981),
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
                         ),
                       ],
@@ -201,15 +203,20 @@ class _ConsentScreenState extends State<ConsentScreen> {
                   ),
                   child: const Row(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Icon(Icons.play_arrow_rounded, color: Colors.white, size: 26),
                       SizedBox(width: 8),
-                      Text(
-                        'Testi Başlat & Kamerayı Aç',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          'Testi Başlat & Kamerayı Aç',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

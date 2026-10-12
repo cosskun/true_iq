@@ -7,7 +7,9 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>True IQ</string>
+	<string>TrueIQ</string>
+	<key>NSCameraUsageDescription</key>
+	<string>TrueIQ, sınav esnasında göz ve dikkat takibi yaparak hileyi önlemek amacıyla ön kamerayı cihaz üzerinde anlık olarak analiz eder. Hiçbir görüntü kaydedilmez veya paylaşılmaz.</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
