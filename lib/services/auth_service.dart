@@ -109,10 +109,7 @@ class AuthService {
     final usersJsonList = users.map((u) => jsonEncode(u.toJson())).toList();
     await _prefs?.setStringList('registered_users', usersJsonList);
 
-    // Oturumu aç
-    _currentUser = newUser;
-    await _prefs?.setString('current_session_user', jsonEncode(newUser.toJson()));
-
+    // Kayıt sonrası otomatik oturum açılmıyor, kullanıcı manuel giriş yapmalıdır
     return (success: true, error: null, user: newUser);
   }
 

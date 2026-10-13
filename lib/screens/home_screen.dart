@@ -3,6 +3,7 @@ import '../models/test_model.dart';
 import '../data/default_tests.dart';
 import '../services/storage_service.dart';
 import '../services/auth_service.dart';
+import '../widgets/leaderboard_modal.dart';
 import 'consent_screen.dart';
 import 'result_screen.dart';
 import 'login_screen.dart';
@@ -84,6 +85,11 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.emoji_events_rounded, color: Color(0xFFF59E0B)),
+            tooltip: 'Liderlik Sıralaması',
+            onPressed: () => LeaderboardModal.show(context),
+          ),
           PopupMenuButton<String>(
             icon: const Icon(Icons.more_vert, color: Colors.white),
             color: const Color(0xFF1E293B),
@@ -207,6 +213,8 @@ class _HomeScreenState extends State<HomeScreen> {
     final remaining = storage?.getRemainingAttempts(test.id, maxAttempts: test.maxFailureAttempts) ?? test.maxFailureAttempts;
     final isLocked = storage?.isTestLocked(test.id, maxAttempts: test.maxFailureAttempts) ?? false;
     final bestScore = storage?.getBestIqScore(test.id);
+    final currentUsername = _authService?.currentUser?.username ?? '';
+    final userRank = storage?.getUserRankInLeaderboard(test.id, currentUsername) ?? 0;
 
     Color badgeBg;
     Color badgeText;
@@ -391,6 +399,56 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: const TextStyle(
                           color: Color(0xFF818CF8),
                           fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  InkWell(
+                    borderRadius: BorderRadius.circular(8),
+                    onTap: () => LeaderboardModal.show(context, test: test),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF59E0B).withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFF59E0B).withValues(alpha: 0.4)),
+                      ),
+                      child: const Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(Icons.emoji_events_rounded, color: Color(0xFFF59E0B), size: 15),
+                          SizedBox(width: 5),
+                          Text(
+                            'Sıralama Tablosu',
+                            style: TextStyle(
+                              color: Color(0xFFF59E0B),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  if (userRank > 0)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF10B981).withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFF10B981).withValues(alpha: 0.4)),
+                      ),
+                      child: Text(
+                        '🏆 Sıranız: #$userRank',
+                        style: const TextStyle(
+                          color: Color(0xFF10B981),
+                          fontSize: 11,
                           fontWeight: FontWeight.bold,
                         ),
                       ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../services/auth_service.dart';
-import 'home_screen.dart';
+import 'login_screen.dart';
 
 class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
@@ -23,6 +23,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String? _errorMessage;
   String? _usernameStatusText;
   bool? _isUsernameAvailable;
+  String? _emailStatusText;
+  bool? _isEmailAvailable;
 
   @override
   void dispose() {
@@ -54,6 +56,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
     });
   }
 
+  void _checkEmail(String val) async {
+    final clean = val.trim().toLowerCase();
+    if (!clean.contains('@') || !clean.contains('.') || clean.length < 5) {
+      setState(() {
+        _isEmailAvailable = null;
+        _emailStatusText = null;
+      });
+      return;
+    }
+
+    final authService = await AuthService.getInstance();
+    final taken = authService.isEmailTaken(clean);
+    setState(() {
+      _isEmailAvailable = !taken;
+      _emailStatusText = taken
+          ? '❌ Bu e-posta adresi zaten kullanılıyor!'
+          : '✓ E-posta kullanılabilir';
+    });
+  }
+
   void _handleRegister() async {
     if (!_formKey.currentState!.validate()) return;
 
@@ -80,17 +102,32 @@ class _RegisterScreenState extends State<RegisterScreen> {
     if (!mounted) return;
 
     if (result.success) {
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Hoş geldiniz, ${result.user?.fullName}! Kaydınız başarıyla oluşturuldu.'),
-          backgroundColor: const Color(0xFF10B981),
+        const SnackBar(
+          content: Row(
+            children: [
+              Icon(Icons.check_circle_outline, color: Colors.white),
+              SizedBox(width: 8),
+              Expanded(
+                child: Text('Kayıt başarılı lütfen giriş yapınız.'),
+              ),
+            ],
+          ),
+          backgroundColor: Color(0xFF10B981),
+          duration: Duration(seconds: 3),
         ),
       );
-      Navigator.pushAndRemoveUntil(
-        context,
-        MaterialPageRoute(builder: (_) => const HomeScreen()),
-        (route) => false,
-      );
+
+      final registeredUsername = _usernameController.text.trim();
+      if (Navigator.canPop(context)) {
+        Navigator.pop(context, registeredUsername);
+      } else {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const LoginScreen()),
+        );
+      }
     } else {
       setState(() {
         _isLoading = false;
@@ -230,22 +267,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ],
                   const SizedBox(height: 16),
 
-                  // 3. E-posta
-                  _buildInputLabel('E-Posta Adresi'),
+                  // 3. E-posta (Benzersiz)
+                  _buildInputLabel('E-Posta Adresi (Benzersiz)'),
                   TextFormField(
                     controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
+                    onChanged: _checkEmail,
                     style: const TextStyle(color: Colors.white),
                     decoration: _inputDecoration(
                       hint: 'ahmet@ornek.com',
                       prefixIcon: Icons.email_outlined,
+                      suffixIcon: _isEmailAvailable == null
+                          ? null
+                          : Icon(
+                              _isEmailAvailable! ? Icons.check_circle : Icons.cancel,
+                              color: _isEmailAvailable! ? const Color(0xFF10B981) : Colors.redAccent,
+                            ),
                     ),
                     validator: (val) {
                       if (val == null || val.trim().isEmpty) return 'E-posta alanı zorunludur.';
                       if (!val.contains('@') || !val.contains('.')) return 'Geçerli bir e-posta giriniz.';
+                      if (_isEmailAvailable == false) return 'Bu e-posta adresi zaten kullanılıyor!';
                       return null;
                     },
                   ),
+                  if (_emailStatusText != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _emailStatusText!,
+                      style: TextStyle(
+                        color: _isEmailAvailable == true ? const Color(0xFF10B981) : Colors.redAccent,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
                   const SizedBox(height: 16),
 
                   // 4. Şifre
@@ -317,7 +373,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
                             )
                           : const Text(
-                              'Hesap Oluştur ve Başla',
+                              'Hesap Oluştur',
                               style: TextStyle(
                                 color: Colors.white,
                                 fontSize: 16,

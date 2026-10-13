@@ -100,7 +100,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
               _buildRuleItem(
                 icon: Icons.visibility_off,
                 title: 'Göz ve Dikkat Takibi (Zorunlu)',
-                description: 'Test sırasında ön kamera aracılığıyla gözleriniz izlenir. Gözlerinizi 2.5 saniyeden uzun süre ekrandan ayırırsanız test BAŞARISIZ sayılarak sonlandırılır.',
+                description: 'Test sırasında ön kamera aracılığıyla gözleriniz izlenir. Gözlerinizi 5 saniyeden uzun süre ekrandan ayırırsanız test BAŞARISIZ sayılarak sonlandırılır.',
               ),
               _buildRuleItem(
                 icon: Icons.lock,
@@ -184,20 +184,31 @@ class _ConsentScreenState extends State<ConsentScreen> {
                 width: double.infinity,
                 height: 54,
                 child: ElevatedButton(
-                  onPressed: (_agreedKvkk && _agreedRules)
-                      ? () {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => TestScreen(test: widget.test),
-                            ),
-                          );
-                        }
-                      : null,
+                  onPressed: () {
+                    if (!_agreedKvkk || !_agreedRules) {
+                      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Bu seçeneği işaretlemeden teste başlayamazsınız.'),
+                          backgroundColor: Colors.redAccent,
+                          duration: Duration(seconds: 2),
+                        ),
+                      );
+                      return;
+                    }
+
+                    Navigator.pushReplacement(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => TestScreen(test: widget.test),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: widget.test.themeColor,
-                    disabledBackgroundColor: const Color(0xFF334155),
-                    shape: RoundedRectangleUri(
+                    backgroundColor: (_agreedKvkk && _agreedRules)
+                        ? widget.test.themeColor
+                        : const Color(0xFF475569),
+                    shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
@@ -209,7 +220,7 @@ class _ConsentScreenState extends State<ConsentScreen> {
                       SizedBox(width: 8),
                       Flexible(
                         child: Text(
-                          'Testi Başlat & Kamerayı Aç',
+                          'Testi Başlat',
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                           style: TextStyle(

@@ -7,7 +7,7 @@ Flutter ile geliştirilmiş, **On-Device Yapay Zeka (Göz & Dikkat Takibi)** ve 
 ## ✨ Temel Özellikler
 
 1. **👁️ Canlı Göz ve Dikkat Takibi (Eye-Tracking):**
-   * Kullanıcının gözleri ve kafa açısı ekrandan 2.5 saniyeden uzun süre ayrıldığında sınav otomatik olarak sonlandırılır.
+   * Kullanıcının gözleri ve kafa açısı ekrandan 5 saniyeden uzun süre ayrıldığında sınav otomatik olarak sonlandırılır.
    * Görüntüler sunucuya aktarılmaz, cihazın geçici belleğinde anlık olarak işlenir.
 2. **🔒 Uygulama Kitleme ve Odak Koruması:**
    * Test sırasında başka bir uygulamaya geçiş yapıldığında veya arka plana atıldığında test anında başarısız sayılır.
@@ -20,6 +20,10 @@ Flutter ile geliştirilmiş, **On-Device Yapay Zeka (Göz & Dikkat Takibi)** ve 
    * Başarıyla tamamlanan bir test kalıcı olarak kilitlenir ve bir daha asla çözülemez.
 6. **🌟 Detaylı Bilişsel Rapor & Sosyal Medya Paylaşım Sertifikası:**
    * Kullanıcının Adı, Soyadı, `@kullaniciadi`, IQ Skoru ve Güvenlik Mührü içeren paylaşılabilir sertifika kartı.
+7. **🏆 Özel Test Kataloğu & Kullanıcı Adlı Liderlik Sıralaması:**
+   * **6 Farklı Özel Test:** `TrueIQ Alpha Matrix`, `Mensa Titan Challenge`, `Cortex HyperSpeed`, `Nexus 3D Vision`, `Quantum Deduction`, `Verbal Spectrum`.
+   * Her testin bağımsız liderlik tablosu; oyuncuların `@kullanıcıadı`, IQ skoru ve bitirme sürelerine göre altın, gümüş, bronz podyum ve sıralama listesi.
+   * Kullanıcının kendi derecesini anlık takip edebileceği interaktif sıralama modülü (`LeaderboardModal`).
 
 ---
 

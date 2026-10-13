@@ -5,6 +5,7 @@ import '../models/test_attempt.dart';
 import '../models/question.dart';
 import '../services/storage_service.dart';
 import '../widgets/share_certificate_card.dart';
+import '../widgets/leaderboard_modal.dart';
 import 'consent_screen.dart';
 
 class ResultScreen extends StatefulWidget {
@@ -368,6 +369,25 @@ class _ResultScreenState extends State<ResultScreen> {
                           ),
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFFEC4899),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Sıralamadaki Yeri Gör Butonu
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: OutlinedButton.icon(
+                          onPressed: () => LeaderboardModal.show(context, test: widget.test),
+                          icon: const Icon(Icons.emoji_events_rounded, color: Color(0xFFF59E0B)),
+                          label: const Text(
+                            '🏆 Sıralamadaki Yerinizi Görün',
+                            style: TextStyle(color: Color(0xFFF59E0B), fontSize: 15, fontWeight: FontWeight.bold),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            side: const BorderSide(color: Color(0xFFF59E0B)),
                             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                           ),
                         ),

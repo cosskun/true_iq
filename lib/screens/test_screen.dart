@@ -3,7 +3,9 @@ import 'package:flutter/material.dart';
 import '../models/test_model.dart';
 import '../models/question.dart';
 import '../models/test_attempt.dart';
+import '../models/leaderboard_entry.dart';
 import '../services/storage_service.dart';
+import '../services/auth_service.dart';
 import '../services/proctor_service.dart';
 import '../services/camera_vision_service.dart';
 import '../widgets/proctor_hud.dart';
@@ -96,7 +98,7 @@ class _TestScreenState extends State<TestScreen> {
 
     // Göz ve Sınav Güvenliği Servisini Başlat
     _proctorService = ProctorService(
-      maxToleranceSeconds: 2.5,
+      maxToleranceSeconds: 5.0,
       onViolation: (type, reason) {
         if (!_isPaused) {
           _handleProctorViolation(type, reason);
@@ -300,6 +302,28 @@ class _TestScreenState extends State<TestScreen> {
     _attempt.pauseCountUsed = _pauseCountUsed;
 
     await _storageService.saveAttempt(_attempt);
+
+    // Liderlik Sıralamasına Kullanıcıyı Dahil Et
+    try {
+      final auth = await AuthService.getInstance();
+      final user = auth.currentUser;
+      final username = user?.username ?? 'sen';
+      final fullName = user?.fullName ?? 'Kullanıcı';
+      final int timeTaken = (widget.test.durationMinutes * 60) - _remainingSeconds;
+
+      final entry = LeaderboardEntry(
+        testId: widget.test.id,
+        username: username,
+        fullName: fullName,
+        iqScore: calculatedIq,
+        correctAnswers: _correctAnswersCount,
+        totalQuestions: _questions.length,
+        timeTakenSeconds: timeTaken > 0 ? timeTaken : 60,
+        completedAt: DateTime.now(),
+        isCurrentUser: true,
+      );
+      await _storageService.addOrUpdateLeaderboardEntry(entry);
+    } catch (_) {}
 
     if (mounted) {
       Navigator.pushReplacement(

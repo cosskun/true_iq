@@ -23,7 +23,7 @@ class GazeState {
     required this.yawAngle,
     required this.pitchAngle,
     required this.gazeLostSeconds,
-    this.maxToleranceSeconds = 2.5,
+    this.maxToleranceSeconds = 5.0,
     required this.statusMessage,
   });
 
@@ -45,7 +45,7 @@ class ProctorService with WidgetsBindingObserver {
   bool _isActive = false;
 
   ProctorService({
-    this.maxToleranceSeconds = 2.5,
+    this.maxToleranceSeconds = 5.0,
     required this.onViolation,
     this.onGazeStateChanged,
   });
@@ -65,9 +65,12 @@ class ProctorService with WidgetsBindingObserver {
         _gazeLostDuration += 0.1;
         if (_gazeLostDuration >= maxToleranceSeconds) {
           _isActive = false;
+          final toleranceDisplay = maxToleranceSeconds == maxToleranceSeconds.roundToDouble()
+              ? '${maxToleranceSeconds.toInt()}'
+              : '$maxToleranceSeconds';
           final reason = !_isFaceDetected
               ? 'Yüzünüz kamera açısında tespit edilemedi!'
-              : 'Gözleriniz $maxToleranceSeconds saniyeden uzun süre ekrandan ayrıldı!';
+              : 'Gözleriniz $toleranceDisplay saniyeden uzun süre ekrandan ayrıldı!';
           onViolation(
             !_isFaceDetected
                 ? ProctorViolationType.faceNotDetected

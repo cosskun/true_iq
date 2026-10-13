@@ -71,12 +71,13 @@ class _LoginScreenState extends State<LoginScreen> {
         email: 'demo@iqmaster.com',
         password: 'password123',
       );
-    } else {
-      await authService.login(
-        usernameOrEmail: 'demo_kullanici',
-        password: 'password123',
-      );
     }
+    
+    // Demo kullanıcısı ile giriş yap
+    await authService.login(
+      usernameOrEmail: 'demo_kullanici',
+      password: 'password123',
+    );
 
     if (!mounted) return;
 
@@ -268,11 +269,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: TextStyle(color: Color(0xFF94A3B8), fontSize: 14),
                       ),
                       InkWell(
-                        onTap: () {
-                          Navigator.push(
+                        onTap: () async {
+                          final registeredUsername = await Navigator.push<String>(
                             context,
                             MaterialPageRoute(builder: (_) => const RegisterScreen()),
                           );
+                          if (registeredUsername != null && registeredUsername.isNotEmpty) {
+                            _identifierController.text = registeredUsername;
+                          }
                         },
                         child: const Text(
                           'Hemen Kayıt Olun',
