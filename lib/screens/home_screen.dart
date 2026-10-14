@@ -371,22 +371,30 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 14),
               const Divider(color: Color(0xFF334155)),
               const SizedBox(height: 8),
-              Row(
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: 12,
+                runSpacing: 6,
                 children: [
-                  const Icon(Icons.help_outline, color: Color(0xFF94A3B8), size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${test.totalQuestionsPerSession} Soru',
-                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(Icons.help_outline, color: Color(0xFF94A3B8), size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${test.totalQuestionsPerSession} Soru',
+                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                      ),
+                      const SizedBox(width: 14),
+                      const Icon(Icons.timer_outlined, color: Color(0xFF94A3B8), size: 16),
+                      const SizedBox(width: 4),
+                      Text(
+                        '${test.durationMinutes} Dakika',
+                        style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
+                      ),
+                    ],
                   ),
-                  const SizedBox(width: 16),
-                  const Icon(Icons.timer_outlined, color: Color(0xFF94A3B8), size: 16),
-                  const SizedBox(width: 4),
-                  Text(
-                    '${test.durationMinutes} Dakika',
-                    style: const TextStyle(color: Color(0xFF94A3B8), fontSize: 12),
-                  ),
-                  const Spacer(),
                   if (bestScore != null && bestScore > 0)
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),

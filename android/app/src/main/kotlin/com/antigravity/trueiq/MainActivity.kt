@@ -1,4 +1,4 @@
-package com.antigravity.iqproctor.iq_test_proctor
+package com.antigravity.trueiq
 
 import io.flutter.embedding.android.FlutterActivity
 

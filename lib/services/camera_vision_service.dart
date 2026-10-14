@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:camera/camera.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'proctor_service.dart';
 
 // Koşullu importlar veya Web / Mobile ayrımı
@@ -32,6 +34,19 @@ class CameraVisionService {
   Future<bool> initializeCamera({required ProctorService proctorService}) async {
     try {
       _errorMessage = null;
+
+      // Android & iOS çalışma zamanı kamera izni kontrolü
+      if (!kIsWeb &&
+          (defaultTargetPlatform == TargetPlatform.android ||
+              defaultTargetPlatform == TargetPlatform.iOS)) {
+        final status = await Permission.camera.request();
+        if (status.isDenied || status.isPermanentlyDenied) {
+          _errorMessage = 'Kamera izni verilmedi. Göz takibi için kamera izni gereklidir.';
+          _isInitialized = false;
+          return false;
+        }
+      }
+
       final cameras = await availableCameras();
       if (cameras.isEmpty) {
         _errorMessage = 'Cihazda kullanılabilir kamera bulunamadı.';

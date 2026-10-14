@@ -109,10 +109,10 @@ class ProctorService with WidgetsBindingObserver {
     _currentYaw = yaw;
     _currentPitch = pitch;
 
-    // Açısal tolerans limitleri:
-    // Yaw > ±18 derece (sağa-sola aşırı bakış)
-    // Pitch > ±16 derece (aşağı-yukarı aşırı bakış)
-    final bool isAngleValid = (yaw.abs() <= 18.0) && (pitch.abs() <= 16.0);
+    // Açısal tolerans limitleri (Mobil soru okuma ergonomisi için genişletildi):
+    // Yaw: ±28 derece (metinleri sağa-sola okuma)
+    // Pitch: ±30 derece (telefon ekranındaki soru ve şıklara aşağı bakma)
+    final bool isAngleValid = (yaw.abs() <= 28.0) && (pitch.abs() <= 30.0);
     final bool isEyesVisible = leftEyeOpen || rightEyeOpen;
 
     _isAttentive = faceDetected && isAngleValid && isEyesVisible;
@@ -140,11 +140,14 @@ class ProctorService with WidgetsBindingObserver {
     if (onGazeStateChanged == null) return;
 
     String msg = 'Gözler Ekranda • Güvenli';
-    if (!_isFaceDetected) {
-      msg = 'UYARI: Yüz Algılanamadı!';
-    } else if (!_isAttentive) {
-      final left = (maxToleranceSeconds - _gazeLostDuration).toStringAsFixed(1);
-      msg = 'DİKKAT: Ekrana Odaklanın! ($left s)';
+    if (_gazeLostDuration >= 3.2) {
+      final left = (maxToleranceSeconds - _gazeLostDuration).clamp(0.0, maxToleranceSeconds).toStringAsFixed(1);
+      msg = 'KRİTİK: Ekrana Dönün! ($left s)';
+    } else if (_gazeLostDuration >= 1.2) {
+      final left = (maxToleranceSeconds - _gazeLostDuration).clamp(0.0, maxToleranceSeconds).toStringAsFixed(1);
+      msg = 'DİKKAT: Ekrana Odaklanın ($left s)';
+    } else if (!_isFaceDetected && _gazeLostDuration > 0.6) {
+      msg = 'Yüzünüzü Kadraja Hizalayın';
     }
 
     onGazeStateChanged!(

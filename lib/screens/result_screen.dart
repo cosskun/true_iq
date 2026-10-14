@@ -314,13 +314,16 @@ class _ResultScreenState extends State<ResultScreen> {
                                   child: Column(
                                     crossAxisAlignment: CrossAxisAlignment.start,
                                     children: [
-                                      Row(
+                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                         children: [
-                                          Text(
-                                            _getCategoryDisplayName(entry.key),
-                                            style: const TextStyle(color: Colors.white, fontSize: 13),
+                                          Expanded(
+                                            child: Text(
+                                              _getCategoryDisplayName(entry.key),
+                                              style: const TextStyle(color: Colors.white, fontSize: 13),
+                                            ),
                                           ),
+                                          const SizedBox(width: 8),
                                           Text(
                                             '%${(pct * 100).round()}',
                                             style: const TextStyle(

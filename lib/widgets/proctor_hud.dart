@@ -26,8 +26,13 @@ class ProctorHud extends StatelessWidget {
           statusMessage: 'Kamera Aktif • İzleniyor',
         );
 
-    final bool isWarning = !state.isAttentive || !state.isFaceDetected;
-    final Color badgeColor = isWarning ? Colors.redAccent : const Color(0xFF10B981);
+    final double lostSec = state.gazeLostSeconds;
+    final bool isCritical = lostSec >= 3.2;
+    final bool isWarning = lostSec >= 1.2 && lostSec < 3.2;
+
+    final Color badgeColor = isCritical
+        ? Colors.redAccent
+        : (isWarning ? const Color(0xFFF59E0B) : const Color(0xFF10B981));
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -35,16 +40,18 @@ class ProctorHud extends StatelessWidget {
         color: const Color(0xFF1E293B).withValues(alpha: 0.95),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isWarning ? Colors.redAccent : const Color(0xFF334155),
-          width: isWarning ? 2.0 : 1.0,
+          color: isCritical
+              ? Colors.redAccent
+              : (isWarning ? const Color(0xFFF59E0B) : const Color(0xFF334155)),
+          width: isCritical ? 2.0 : 1.0,
         ),
         boxShadow: [
           BoxShadow(
-            color: isWarning
-                ? Colors.redAccent.withValues(alpha: 0.35)
+            color: isCritical
+                ? Colors.redAccent.withValues(alpha: 0.25)
                 : Colors.black.withValues(alpha: 0.2),
-            blurRadius: isWarning ? 14 : 8,
-            spreadRadius: isWarning ? 2 : 0,
+            blurRadius: isCritical ? 10 : 6,
+            spreadRadius: isCritical ? 1 : 0,
           ),
         ],
       ),
@@ -52,19 +59,19 @@ class ProctorHud extends StatelessWidget {
         children: [
           // CANLI ÖN KAMERA AKIŞI (Oval Çerçeve)
           Container(
-            width: 54,
-            height: 54,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
               color: const Color(0xFF0F172A),
               shape: BoxShape.circle,
               border: Border.all(
                 color: badgeColor,
-                width: 2.5,
+                width: 2.0,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: badgeColor.withValues(alpha: 0.4),
-                  blurRadius: 8,
+                  color: badgeColor.withValues(alpha: 0.3),
+                  blurRadius: 6,
                   spreadRadius: 1,
                 ),
               ],
@@ -73,7 +80,7 @@ class ProctorHud extends StatelessWidget {
               child: _buildCameraPreview(badgeColor),
             ),
           ),
-          const SizedBox(width: 14),
+          const SizedBox(width: 12),
 
           // Durum Mesajı ve Dikkat Seviyesi İlerleme Çubuğu
           Expanded(
@@ -98,7 +105,9 @@ class ProctorHud extends StatelessWidget {
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          color: isWarning ? Colors.redAccent : Colors.white,
+                          color: isCritical
+                              ? Colors.redAccent
+                              : (isWarning ? const Color(0xFFF59E0B) : Colors.white),
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
                         ),
@@ -112,11 +121,7 @@ class ProctorHud extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: state.attentionPercent,
                     backgroundColor: const Color(0xFF334155),
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      state.attentionPercent > 0.5
-                          ? const Color(0xFF10B981)
-                          : Colors.redAccent,
-                    ),
+                    valueColor: AlwaysStoppedAnimation<Color>(badgeColor),
                     minHeight: 6,
                   ),
                 ),
@@ -124,14 +129,27 @@ class ProctorHud extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Text(
-                      isWarning ? '⚠️ Göz/Kafa Ekran Dışında' : '🛡️ Otomatik Yapay Zeka Göz Takibi',
-                      style: TextStyle(
-                        fontSize: 10,
-                        color: isWarning ? Colors.redAccent : const Color(0xFF94A3B8),
-                        fontWeight: isWarning ? FontWeight.bold : FontWeight.normal,
+                    Expanded(
+                      child: Text(
+                        isCritical
+                            ? '⚠️ Sınav İptal Tehlikesi!'
+                            : (isWarning
+                                ? '⚠️ Ekrana Odaklanın'
+                                : '🛡️ Otomatik Göz Takibi'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: 10,
+                          color: isCritical
+                              ? Colors.redAccent
+                              : (isWarning ? const Color(0xFFF59E0B) : const Color(0xFF94A3B8)),
+                          fontWeight: (isCritical || isWarning)
+                              ? FontWeight.bold
+                              : FontWeight.normal,
+                        ),
                       ),
                     ),
+                    const SizedBox(width: 6),
                     Text(
                       '${(state.attentionPercent * 100).toInt()}%',
                       style: TextStyle(
